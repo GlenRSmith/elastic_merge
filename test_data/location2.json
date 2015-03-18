@@ -1,0 +1,9 @@
+{
+  "fn": "Bill Keller Health",
+  "address": {"city": "Chicago"},
+  "_links": {
+    "self": {
+      "href": "location.x00001034"
+    }
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "settings": {"number_of_shards": 1, "number_of_replicas": 0},
+  "mappings": {
+    "twitter": {
+      "_id": {
+        "path": "_links.self.href",
+        "store": true
+      },
+      "properties": {
+        "id": {"type": "string"},
+        "nct_id": {"type": "string"},
+        "condition": {"type": "string"},
+        "intervention": {"type": "string"},
+        "_links": {
+          "properties": {
+            "self": {"properties": {"href": {"type": "string", "index": "not_analyzed", "copy_to": "id"}}},
+            "tweet": {"properties": {"href": { "type": "string", "index": "not_analyzed"}}}
+          }
+        }
+      }
+    },
+    "tweet": {
+      "_parent": {"type": "twitter"},
+      "_id": {
+        "path": "_links.self.href"
+      },
+      "properties": {
+        "id": {"type": "string"},
+        "status": {"type": "string"},
+        "_links": {
+          "properties": {
+            "self": {
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "index": "not_analyzed",
+                  "copy_to": "id"
+                }
+              }
+            },
+            "twitter": {"properties": {"href": { "type": "string", "index": "not_analyzed"}}},
+            "location": {"properties": {"href": { "type": "string", "index": "not_analyzed"}}}
+          }
+        }
+      }
+    },
+    "location": {
+      "_parent": {"type": "tweet"},
+      "_id": {
+        "path": "_links.self.href"
+      },
+      "properties": {
+        "id": {"type": "string"},
+        "fn": {
+          "type": "string",
+          "analyzer": "standard"
+        },
+        "_links": {
+          "properties": {
+            "self": {
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "index": "not_analyzed",
+                  "copy_to": "id"
+                }
+              }
+            },
+            "tweet": {"properties": {"href": { "type": "string", "index": "not_analyzed"}}}
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "id_info": {"nct_id": "NCT1111111"},
+  "condition": "grumpy",
+  "intervention": "ping pong",
+  "_links": {
+    "self": {
+      "href": "twitter.xFF0CFD"
+    }
+  }
+}
