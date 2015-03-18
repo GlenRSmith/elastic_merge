@@ -2,18 +2,19 @@
 # -*- coding: utf8 -*-
 import copy
 import inspect
-import json
+# import json
 from os import path
 import sys
 import unittest2
 import xmlrunner
 
 from es_util import create_index, delete_index, flush_index, index_doc
-from es_wrap import search_merge, post_graph_search
+from es_wrap import post_graph_search
 from gen_utils import read_json_file
 
 CWD = path.dirname(__file__)
 DATA_DIR = path.join(CWD, "test_data")
+TEST_HOST = "http://localhost:9200"
 INDEX = "elastic_merge"
 
 
@@ -26,33 +27,33 @@ class TestSearchMerge(unittest2.TestCase):
     @classmethod
     def setUpClass(cls):
         try:
-            delete_index(INDEX)
+            delete_index(TEST_HOST, INDEX)
         except Exception as err:
             print(u'err: {0}, no1curr'.format(err))
         index_config = read_doc_file("index.json")
-        create_index(INDEX, index_config)
+        create_index(TEST_HOST, INDEX, index_config)
         # in Elasticsearch, parents don't know about children,
         # so we index the test docs from the 'top down':
         TestSearchMerge.twitter1 = read_doc_file("twitter1.json")
         TestSearchMerge.twitter1_id = index_doc(
-            INDEX, 'twitter', TestSearchMerge.twitter1)
+            TEST_HOST, INDEX, 'twitter', TestSearchMerge.twitter1)
         TestSearchMerge.tweet1 = read_doc_file("tweet1.json")
         TestSearchMerge.tweet1_id = index_doc(
-            INDEX, 'tweet', TestSearchMerge.tweet1,
+            TEST_HOST, INDEX, 'tweet', TestSearchMerge.tweet1,
             parent_id=TestSearchMerge.twitter1_id)
         TestSearchMerge.tweet2 = read_doc_file("tweet2.json")
         TestSearchMerge.tweet2_id = index_doc(
-            INDEX, 'tweet', TestSearchMerge.tweet2,
+            TEST_HOST, INDEX, 'tweet', TestSearchMerge.tweet2,
             parent_id=TestSearchMerge.twitter1_id)
         TestSearchMerge.loc1 = read_doc_file("location1.json")
         TestSearchMerge.loc1_id = index_doc(
-            INDEX, 'location', TestSearchMerge.loc1,
+            TEST_HOST, INDEX, 'location', TestSearchMerge.loc1,
             parent_id=TestSearchMerge.tweet1_id)
         TestSearchMerge.loc2 = read_doc_file("location2.json")
         TestSearchMerge.loc2_id = index_doc(
-            INDEX, 'location', TestSearchMerge.loc2,
+            TEST_HOST, INDEX, 'location', TestSearchMerge.loc2,
             parent_id=TestSearchMerge.tweet2_id)
-        flush_index(INDEX)
+        flush_index(TEST_HOST, INDEX)
 
 
     @classmethod
@@ -85,8 +86,15 @@ class TestSearchMerge(unittest2.TestCase):
         self.assertEqual(TestSearchMerge.loc2_id, 'location.x00001034')
         return
 
-    def test_search_merge_twitters(self):
-        twitters = search_merge('twitter', self.twitter_crit, 'tweet', self.tweet_crit)
+    def test_get_twitter_graph(self):
+        rel_args = {'tweet': self.tweet_crit}
+        twitters = post_graph_search(TEST_HOST, {
+            "query": {
+                "doc_type": "twitter",
+                "doc_criteria": self.twitter_crit,
+                "rel_criteria": rel_args
+            }
+        })
         self.assertEqual(len(twitters), 1)
         for tag in ['_merged', 'condition', 'intervention', 'id_info']:
             self.assertIn(tag, twitters[0])
@@ -97,22 +105,10 @@ class TestSearchMerge(unittest2.TestCase):
             twitters[0]['_links']['self']['href'], TestSearchMerge.twitter1_id)
         return
 
-    def test_search_merge_tweets(self):
-        tweets = search_merge('tweet', self.tweet_crit, 'twitter', self.twitter_crit)
-        self.assertEqual(len(tweets), 1)
-        for tag in ['_merged', 'status', '_links']:
-            self.assertIn(tag, tweets[0])
-        self.assertIn('twitter', tweets[0]['_merged'])
-        self.assertDictEqual(
-            tweets[0]['_merged']['twitter'][0], TestSearchMerge.twitter1)
-        self.assertEqual(
-            tweets[0]['_links']['self']['href'], TestSearchMerge.tweet1_id)
-        return
-
     def test_get_tweet_graph(self):
         rel_args = {'twitter': self.twitter_crit, 'location': self.loc_crit}
         # tweets = get_document_graph('tweet', self.tweet_crit, rel_args)
-        tweets = post_graph_search({
+        tweets = post_graph_search(TEST_HOST, {
             "query": {
                 "doc_type": "tweet",
                 "doc_criteria": self.tweet_crit,

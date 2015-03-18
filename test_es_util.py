@@ -11,6 +11,7 @@ from gen_utils import read_json_file
 
 CWD = path.dirname(__file__)
 DATA_DIR = path.join(CWD, "test_data")
+TEST_HOST = "http://localhost:9200"
 INDEX = "elastic_merge"
 
 
@@ -22,33 +23,33 @@ class TestSearch(unittest2.TestCase):
     @classmethod
     def setUpClass(cls):
         try:
-            delete_index(INDEX)
+            delete_index(TEST_HOST, INDEX)
         except Exception as err:
             print(u'err: {0}, no1curr'.format(err))
         index_config = read_doc_file("index.json")
-        create_index(INDEX, index_config)
+        create_index(TEST_HOST, INDEX, index_config)
         # in Elasticsearch, parents don't know about children,
         # so we index the test docs from the 'top down':
         TestSearch.twitter1 = read_doc_file("twitter1.json")
         TestSearch.twitter1_id = index_doc(
-            INDEX, 'twitter', TestSearch.twitter1)
+            TEST_HOST, INDEX, 'twitter', TestSearch.twitter1)
         TestSearch.tweet1 = read_doc_file("tweet1.json")
         TestSearch.tweet1_id = index_doc(
-            INDEX, 'tweet', TestSearch.tweet1,
+            TEST_HOST, INDEX, 'tweet', TestSearch.tweet1,
             parent_id=TestSearch.twitter1_id)
         TestSearch.tweet2 = read_doc_file("tweet2.json")
         TestSearch.tweet2_id = index_doc(
-            INDEX, 'tweet', TestSearch.tweet2,
+            TEST_HOST, INDEX, 'tweet', TestSearch.tweet2,
             parent_id=TestSearch.twitter1_id)
         TestSearch.loc1 = read_doc_file("location1.json")
         TestSearch.loc1_id = index_doc(
-            INDEX, 'location', TestSearch.loc1,
+            TEST_HOST, INDEX, 'location', TestSearch.loc1,
             parent_id=TestSearch.tweet1_id)
         TestSearch.loc2 = read_doc_file("location2.json")
         TestSearch.loc2_id = index_doc(
-            INDEX, 'location', TestSearch.loc2,
+            TEST_HOST, INDEX, 'location', TestSearch.loc2,
             parent_id=TestSearch.tweet2_id)
-        flush_index(INDEX)
+        flush_index(TEST_HOST, INDEX)
 
 
     @classmethod
@@ -84,14 +85,14 @@ class TestSearch(unittest2.TestCase):
     def test_twitter_search(self):
         # Find a twitter by tweet criteria
         search1 = self.tweet_child_crit
-        twitters = search(INDEX, 'twitter', search1)
+        twitters = search(TEST_HOST, INDEX, 'twitter', search1)
         self.assertEqual(twitters[0], TestSearch.twitter1)
         return
 
     def test_tweet_search(self):
         # Find tweets by twitter criteria
         search2 = self.twitter_parent_crit
-        tweets = search(INDEX, 'tweet', search2)
+        tweets = search(TEST_HOST, INDEX, 'tweet', search2)
         self.assertIn(TestSearch.tweet1, tweets)
         self.assertIn(TestSearch.tweet2, tweets)
         return

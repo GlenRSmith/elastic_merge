@@ -4,26 +4,26 @@ import json
 from os import path
 
 import requests
+from settings import ES_HOST as HOST
+from settings import INDEX
 
-
-HOST = "http://localhost:9200"
-INDEX = "elastic_merge"
+# (unguarded) singleton for lazy init
 MAPPINGS = None
 
 
-def delete_index(index_name):
-    index_res = requests.delete(path.join(HOST, index_name))
+def delete_index(host, index_name):
+    index_res = requests.delete(path.join(host, index_name))
     if not index_res.status_code == 200:
         err = u'index_res: {0} - {1}'.format(index_res, index_res.text)
         raise Exception(err)
     return index_res
 
 
-def create_index(index_name, config):
+def create_index(host, index_name, config):
     """
     Create an ES index with the (json) configuration
     """
-    index_res = requests.post(path.join(HOST, index_name),
+    index_res = requests.post(path.join(host, index_name),
                               data=json.dumps(config))
     if not index_res.status_code == 200:
         err = u'index_res: {0} - {1}'.format(index_res, index_res.text)
@@ -31,36 +31,36 @@ def create_index(index_name, config):
     return
 
 
-def flush_index(index_name):
-    return requests.post(path.join(HOST, index_name, '_flush'))
+def flush_index(host, index_name):
+    return requests.post(path.join(host, index_name, '_flush'))
 
 
-def get_mappings():
+def get_mappings(host):
     global MAPPINGS
     if not MAPPINGS:
-        maps_url = path.join(HOST, INDEX, '_mapping')
+        maps_url = path.join(host, INDEX, '_mapping')
         res = requests.get(maps_url)
         MAPPINGS = res.json()[INDEX]["mappings"]
     return MAPPINGS
 
 
-def get_id_path(doc_type):
-    return get_mappings()[doc_type]["_id"]["path"]
+def get_id_path(host, doc_type):
+    return get_mappings(host)[doc_type]["_id"]["path"]
 
 
-def get_doc_id(doc, doc_type):
+def get_doc_id(host, doc, doc_type):
     ptr = doc
-    for tag in get_id_path(doc_type).split('.'):
+    for tag in get_id_path(host, doc_type).split('.'):
         ptr = ptr[tag]
     return ptr
 
 
-def index_doc(index_name, type_name, doc, parent_id=None):
+def index_doc(host, index_name, type_name, doc, parent_id=None):
     """
     indexes the document into the named index and type_name
     returns the ES assigned _id
     """
-    index_url = path.join(HOST, index_name, type_name)
+    index_url = path.join(host, index_name, type_name)
     params = {}
     if parent_id:
         params['parent'] = parent_id
@@ -76,7 +76,7 @@ def index_doc(index_name, type_name, doc, parent_id=None):
     return index_res.json()['_id']
 
 
-def search(index_name, type_name, crit):
+def search(host, index_name, type_name, crit):
     def build_bool_list(criteria, must=None):
         """
         recursive function to build a must, should, or must_not list in a bool
@@ -92,7 +92,7 @@ def search(index_name, type_name, crit):
             raise Exception(u'criteria {0} not list or dict'.format(criteria))
         return must
 
-    search_url = path.join(HOST, index_name, type_name, '_search') + '?pretty'
+    search_url = path.join(host, index_name, type_name, '_search') + '?pretty'
     # print(u'search_url: {0}'.format(search_url))
     # print(u'crit: {0}'.format(crit))
     query = {"query": {"bool": {"must": build_bool_list(crit)}}}
