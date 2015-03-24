@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 import copy
 import inspect
-# import json
+import json
 from os import path
 import sys
 import unittest2
@@ -16,6 +16,7 @@ CWD = path.dirname(__file__)
 DATA_DIR = path.join(CWD, "test_data")
 TEST_HOST = "http://localhost:9200"
 INDEX = "elastic_merge"
+VERBOSE = False
 
 
 def read_doc_file(filename):
@@ -108,13 +109,14 @@ class TestSearchMerge(unittest2.TestCase):
     def test_get_tweet_graph(self):
         rel_args = {'twitter': self.twitter_crit, 'location': self.loc_crit}
         # tweets = get_document_graph('tweet', self.tweet_crit, rel_args)
-        tweets = post_graph_search(TEST_HOST, {
+        search_body = {
             "query": {
                 "doc_type": "tweet",
                 "doc_criteria": self.tweet_crit,
                 "rel_criteria": rel_args
             }
-        })
+        }
+        tweets = post_graph_search(TEST_HOST, search_body)
         self.assertEqual(len(tweets), 1)
         for tag in ['_merged', 'status', '_links']:
             self.assertIn(tag, tweets[0])
@@ -126,6 +128,9 @@ class TestSearchMerge(unittest2.TestCase):
         self.assertIn('location', tweets[0]['_merged'])
         self.assertDictEqual(
             tweets[0]['_merged']['location'][0], TestSearchMerge.loc1)
+        if VERBOSE:
+            print(u'\nSearch body:\n{0}'.format(json.dumps(search_body)))
+            print(u'\nSearch result:\n{0}'.format(json.dumps(tweets)))
         return
 
 
