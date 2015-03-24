@@ -53,9 +53,6 @@ Next steps:
  - Write a flask service to wrap the imitation ReST methods
  - refactor the response back into normal ES reply body, with metadata
 
-
-
-
 Background:
 
 I've spent quite a bit of time contemplating handling relationships, and questions around that
