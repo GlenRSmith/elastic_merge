@@ -2,10 +2,6 @@ Purpose:
 
 Models one option for a ReSTful endpoint which would support searching for and returning related documents
 
-Next steps:
-
-Write a flask service to wrap the imitation ReST methods 
-
 - api.py, test_api.py:
     - misleadingly named
     - handles the bits related to object digraph links
@@ -21,17 +17,48 @@ Write a flask service to wrap the imitation ReST methods
       
 Query form:
 ```
-  {
-    "query": {
-      "doc_type": "The type of document desired as the top-level returned",
-      "doc_criteria": "search object for doc_type",
-      "rel_criteria": {
-        "a doc type 'related to' doc_type": "search object for this doc type",
-        "another related doc type": "search object for this doc type"
-      }
+{
+  "query": {
+    "doc_type": "The type of document desired as the top-level returned",
+    "doc_criteria": "search object for doc_type",
+    "rel_criteria": {
+      "a doc type 'related to' doc_type": "search object for this doc type",
+      "another related doc type": "search object for this doc type"
     }
   }
+}
 ```
+
+Response form (extracted from the usual response with metadata and "hits"):
+```
+[
+  {
+    "field name(s) from matching doc_type": "field value(s)",
+    "_merged": {
+      "name of requested related doc_type": [
+        {
+          "field name(s) from matching related doc_type": "field value(s)"
+        }
+      ],
+      "name of another requested related doc_type": [
+        {
+          "field name(s) from matching related doc_type": "field value(s)"
+        }
+      ]
+    }
+  },
+  {
+    
+  }
+]
+```
+
+ 
+Next steps:
+ - Write a flask service to wrap the imitation ReST methods
+ - refactor the response back into normal ES reply body, with metadata
+
+
 
 
 Background:
