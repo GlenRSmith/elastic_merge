@@ -36,20 +36,15 @@ Response form (extracted from the usual response with metadata and "hits"):
     "field name(s) from matching doc_type": "field value(s)",
     "_merged": {
       "name of requested related doc_type": [
-        {
-          "field name(s) from matching related doc_type": "field value(s)"
-        }
+        matching related doc_type (object),
+        another matching related doc_type (object),
+        ...
       ],
-      "name of another requested related doc_type": [
-        {
-          "field name(s) from matching related doc_type": "field value(s)"
-        }
-      ]
+      "name of another requested related doc_type": array of matching results,
+      ...
     }
   },
-  {
-    
-  }
+  next matching doc_type
 ]
 ```
 
