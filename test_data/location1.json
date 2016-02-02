@@ -1,0 +1,9 @@
+{
+  "fn": "Mel Daniels Health",
+  "address": {"city": "Chicago"},
+  "_links": {
+    "self": {
+      "href": "location.x0000030A"
+    }
+  }
+}

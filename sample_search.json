@@ -1,0 +1,25 @@
+{
+  "query": {
+    "match": {
+      "status": "Recruiting"
+    }
+  },
+  "rel_query": {
+    "twitter": {
+      "path": {"cpu-load": {"_source": {"include": ["cpu-load.cpu"]}}},
+      "query": {
+        "match": {
+          "condition": "sleepy"
+        }
+      }
+    },
+    "location": {
+      "path": {"cpu-load": {"_source": {"include": ["cpu-load.cpu"]}}},
+      "query": {
+        "match": {
+          "address.city": "Chicago"
+        }
+      }
+    }
+  }
+}

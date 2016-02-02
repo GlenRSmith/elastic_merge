@@ -52,3 +52,35 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# other log files that are generated
+logs/
+
+# temp swap files
+.*.swp
+# generated pdf files
+*.pdf
+
+# generated Graphviz dot files
+*.dot
+
+# sqlite database files
+*.db
+*.db3
+*.sqlite
+*.sqlite3
+
+# PyCharm files
+.idea
+
+# OS X files
+.DS_Store
+
+# reports directory
+reports/
+
+# files we create for/during automated testing
+testdata/
+
+#build related directories & packages
+

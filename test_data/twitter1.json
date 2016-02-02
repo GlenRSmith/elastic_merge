@@ -1,0 +1,10 @@
+{
+  "id_info": {"nct_id": "NCT9999999"},
+  "condition": "sleepy",
+  "intervention": "coffee",
+  "_links": {
+    "self": {
+      "href": "twitter.x009A02"
+    }
+  }
+}
