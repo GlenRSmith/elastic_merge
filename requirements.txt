@@ -1,4 +1,4 @@
-requests==2.5.1
+requests==2.20.0
 six==1.9.0
 unittest2==0.8.0
 xmlrunner==1.7.7
