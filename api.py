@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 """
 Functions related to an API, and how the various document entities relate
 to each other, independent of any elasticsearch relationship scheme
